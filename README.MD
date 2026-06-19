@@ -24,11 +24,11 @@ A API do DuoStock tem como objetivo centralizar as regras de negócio do sistema
 * CORS
 * Dotenv
 * TSX
+* Prisma(O Prisma ORM já está configurado no projeto. A conexão com o PostgreSQL será adicionada na etapa de configuração do banco de dados.)
 
 Futuramente, o projeto também utilizará:
 
 * PostgreSQL
-* Prisma
 * JWT
 * Bcrypt
 
