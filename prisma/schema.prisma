@@ -13,13 +13,18 @@ datasource db {
 }
 
 model Business {
-  id        String   @id @default(uuid())
-  name      String
-  document  String?  @unique
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  users     User[]
+  id             String          @id @default(uuid()) @db.Uuid
+  name           String
+  document       String?         @unique
+  active         Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  users          User[]
+  categories     Category[]
+  suppliers      Supplier[]
+  products       Product[]
+  sales          Sale[]
+  stockMovements StockMovement[]
 }
 
 enum UserRole {
@@ -28,7 +33,7 @@ enum UserRole {
 }
 
 model User {
-  id         String   @id @default(uuid())
+  id         String   @id @default(uuid()) @db.Uuid
   name       String
   email      String   @unique
   password   String
@@ -38,5 +43,119 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  business       Business        @relation(fields: [businessId], references: [id])
+  sales          Sale[]
+  stockMovements StockMovement[]
+}
+
+model Category {
+  id         String    @id @default(uuid()) @db.Uuid
+  name       String
+  businessId String    @db.Uuid
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  business   Business  @relation(fields: [businessId], references: [id])
+  products   Product[]
+
+  @@unique([businessId, name])
+}
+
+model Supplier {
+  id         String    @id @default(uuid()) @db.Uuid
+  name       String
+  email      String?
+  phone      String?
+  document   String?
+  notes      String?
+  businessId String    @db.Uuid
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  business   Business  @relation(fields: [businessId], references: [id])
+  products   Product[]
+
+  @@unique([businessId, document])
+}
+
+model Product {
+  id             String          @id @default(uuid()) @db.Uuid
+  name           String
+  costPrice      Decimal         @db.Decimal(10, 2)
+  salePrice      Decimal         @db.Decimal(10, 2)
+  currentStock   Int             @default(0)
+  minimumStock   Int             @default(0)
+  categoryId     String          @db.Uuid
+  supplierId     String?         @db.Uuid
+  businessId     String          @db.Uuid
+  active         Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  description    String?
+  sku            String?
+  category       Category        @relation(fields: [categoryId], references: [id])
+  supplier       Supplier?       @relation(fields: [supplierId], references: [id])
+  business       Business        @relation(fields: [businessId], references: [id])
+  saleItems      SaleItem[]
+  stockMovements StockMovement[]
+
+  @@unique([businessId, sku])
+}
+
+enum SaleStatus {
+  COMPLETED
+  CANCELLED
+}
+
+model Sale {
+  id             String          @id @default(uuid()) @db.Uuid
+  totalAmount    Decimal         @db.Decimal(10, 2)
+  status         SaleStatus      @default(COMPLETED)
+  businessId     String          @db.Uuid
+  userId         String          @db.Uuid
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  business       Business        @relation(fields: [businessId], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
+  saleItems      SaleItem[]
+  stockMovements StockMovement[]
+}
+
+model SaleItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  saleId    String   @db.Uuid
+  productId String   @db.Uuid
+  quantity  Int
+  unitPrice Decimal  @db.Decimal(10, 2)
+  subtotal  Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+
+  sale    Sale    @relation(fields: [saleId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
+
+enum StockMovementType {
+  ENTRY
+  SALE
+  MANUAL_OUTPUT
+  ADJUSTMENT
+  RETURN
+  LOSS
+}
+
+model StockMovement {
+  id         String            @id @default(uuid()) @db.Uuid
+  type       StockMovementType
+  quantity   Int
+  reason     String?
+  productId  String            @db.Uuid
+  userId     String            @db.Uuid
+  businessId String            @db.Uuid
+  saleId     String?           @db.Uuid
+  createdAt  DateTime          @default(now())
+
+  sale     Sale?    @relation(fields: [saleId], references: [id])
   business Business @relation(fields: [businessId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  product  Product  @relation(fields: [productId], references: [id])
 }
