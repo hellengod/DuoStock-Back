@@ -21,14 +21,14 @@ A API do DuoStock tem como objetivo centralizar as regras de negócio do sistema
 * Node.js
 * TypeScript
 * Express
+* PostgreSQL
+* Prisma ORM
 * CORS
 * Dotenv
 * TSX
-* Prisma(O Prisma ORM já está configurado no projeto. A conexão com o PostgreSQL será adicionada na etapa de configuração do banco de dados.)
 
 Futuramente, o projeto também utilizará:
 
-* PostgreSQL
 * JWT
 * Bcrypt
 
@@ -39,6 +39,7 @@ Antes de rodar o projeto, é necessário ter instalado:
 * Node.js
 * npm
 * Git
+* PostgreSQL
 
 ## Como instalar o projeto
 
@@ -68,6 +69,7 @@ Exemplo:
 
 ```env
 PORT=3333
+DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/duostock?schema=public"
 ```
 
 A porta padrão da API é:
@@ -75,6 +77,14 @@ A porta padrão da API é:
 ```txt
 3333
 ```
+
+O banco local esperado para desenvolvimento é:
+
+```txt
+duostock
+```
+
+O arquivo `.env` não deve ser enviado para o GitHub, pois pode conter informações sensíveis como usuário e senha do banco de dados.
 
 ## Como rodar localmente
 
@@ -117,6 +127,32 @@ http://localhost:3333/health
 
 Essa rota serve apenas para confirmar que a API está ativa e respondendo corretamente.
 
+## Prisma
+
+O projeto utiliza **Prisma ORM** para modelagem e comunicação com o banco de dados PostgreSQL.
+
+Comandos úteis:
+
+```bash
+npx prisma validate
+```
+
+Valida se o schema do Prisma está correto.
+
+```bash
+npx prisma format
+```
+
+Formata o arquivo `schema.prisma`.
+
+```bash
+npx prisma generate
+```
+
+Gera o Prisma Client após alterações no schema.
+
+As migrations serão criadas após a definição final dos models iniciais.
+
 ## Estrutura inicial do projeto
 
 ```txt
@@ -124,14 +160,31 @@ src
 ├── database
 ├── middlewares
 ├── modules
+│   ├── auth
+│   ├── categories
+│   ├── products
+│   ├── sales
+│   ├── stock-movements
+│   ├── suppliers
+│   └── users
 ├── routes
 ├── shared
 └── server.ts
 ```
 
+## Documentação
+
+A modelagem inicial do banco está documentada em:
+
+```txt
+docs/database-modeling.md
+```
+
+Esse documento descreve as entidades principais, campos, relacionamentos e regras de negócio do banco de dados.
+
 ## Padrão de branches
 
-O projeto utilizará branches por funcionalidade ou ajuste.
+O projeto utilizará branches por funcionalidade, ajuste ou documentação.
 
 Exemplos:
 
@@ -142,6 +195,8 @@ feature/setup-prisma
 feature/login
 fix/stock-validation
 docs/update-readme
+docs/database-modeling
+chore/setup-local-database
 ```
 
 ### Regras
@@ -162,6 +217,7 @@ feat: create product endpoint
 feat: setup prisma
 fix: validate stock quantity
 docs: update backend readme
+docs: define initial database modeling
 chore: adjust project structure
 refactor: organize product module
 ```
@@ -184,11 +240,6 @@ Funcionalidades atuais:
 * Estrutura inicial do back-end
 * Servidor Express configurado
 * Rota `/health` funcionando
-
-Próximos passos:
-
-* Configurar Prisma
-* Configurar PostgreSQL
-* Criar modelagem inicial do banco
-* Criar módulos de categorias, produtos, fornecedores, vendas e estoque
-* Implementar autenticação
+* Prisma configurado
+* PostgreSQL local configurado
+* Modelagem inicial do banco documentada
